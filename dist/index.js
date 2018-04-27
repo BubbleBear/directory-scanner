@@ -12,26 +12,26 @@ class Scanner {
         this.recursiveScan(rootObj, dirRealPath);
         return rootObj;
     }
-    recursiveScan(obj, dirPath) {
+    recursiveScan(object, dirPath) {
         const files = fs.readdirSync(dirPath);
-        for (let filePath of files) {
-            filePath = path.resolve(dirPath, filePath);
-            const fileName = path.basename(filePath);
-            if (fileName == '.' || fileName == '..')
+        for (let filepath of files) {
+            filepath = path.resolve(dirPath, filepath);
+            const filename = path.basename(filepath);
+            if (filename == '.' || filename == '..')
                 continue;
-            const stat = fs.statSync(filePath);
+            const stat = fs.statSync(filepath);
             if (stat.isDirectory()) {
-                obj[fileName] = {};
-                this.recursiveScan(obj[fileName], filePath);
+                object[filename] = {};
+                this.recursiveScan(object[filename], filepath);
             }
             else {
-                obj[fileName] = null;
-                this.fileHandler(obj, fileName, filePath);
+                object[filename] = null;
+                this.fileHandler(object, filename, filepath);
             }
         }
     }
-    fileHandler(obj, fileName, filePath) {
-        obj[fileName] = path.extname(fileName);
+    fileHandler(object, filename, filepath) {
+        object[filename] = path.extname(filename);
     }
 }
 exports.Scanner = Scanner;

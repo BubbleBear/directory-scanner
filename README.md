@@ -13,4 +13,33 @@ you will use this package like this:
 
     console.dir(obj);
 
-this is just a prototype, more functiosn like filter shall be implemented in future
+this is just a prototype, more functions like filter shall be implemented in future
+
+## extends
+the actions **directory-scanner** will take while scanning directory can acutally be assigned by you. by rewriting **Scanner.fileHandler** you are free to manipulate it's behavior
+
+**Scanner.fileHandler(object, filename, filepath)** can take 3 parameters, *object* is the object current level directory maps to in our mapping object. *filename* and *filepath* are literally what they are.
+
+an example is:
+
+    import { Scanner } from 'directory-scanner';
+    import * as fs from 'fs';
+    import * as path from 'path';
+
+    const scanner = new Scanner();
+
+    scanner.fileHandler = (o, fn, fp) => {
+        const extname = path.extname(fn);
+        if (extname == '.schema') {
+            o[fn] = fs.readFileSync(fp).toString();
+        }
+    }
+
+    const schemaLoader = function (dirRealPath) {
+        const res = scanner.scan(dirRealPath);
+        console.log(res)
+    }
+
+    schemaLoader(path.resolve(__dirname, '../test'));
+
+the code above will read all files with *\.schema* extname in target directory
