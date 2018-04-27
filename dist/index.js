@@ -1,40 +1,37 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = require("fs");
+const path = require("path");
 class Scanner {
-    private rootObj = {};
-
     constructor(options) {
+        this.rootObj = {};
         ;
     }
-
-    public scan(dirRealPath: string) {
+    scan(dirRealPath) {
         const rootObj = {};
         this.recursiveScan(rootObj, dirRealPath);
         return rootObj;
     }
-
-    private recursiveScan(obj, dirPath) {
+    recursiveScan(obj, dirPath) {
         const files = fs.readdirSync(dirPath);
-
         for (let filePath of files) {
             filePath = path.resolve(dirPath, filePath);
             const fileName = path.basename(filePath);
-            if (fileName == '.' || fileName == '..') continue;
+            if (fileName == '.' || fileName == '..')
+                continue;
             const stat = fs.statSync(filePath);
             if (stat.isDirectory()) {
                 obj[fileName] = {};
                 this.recursiveScan(obj[fileName], filePath);
-            } else {
+            }
+            else {
                 obj[fileName] = null;
                 this.fileHandler(obj, fileName, filePath);
             }
         }
     }
-
-    public fileHandler(obj, fileName, filePath) {
+    fileHandler(obj, fileName, filePath) {
         obj[fileName] = path.extname(fileName);
     }
 }
-
-export { Scanner };
+exports.Scanner = Scanner;
