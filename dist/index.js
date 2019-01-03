@@ -25,7 +25,6 @@ class Scanner {
                 this.recursiveScan(object[filename], filepath);
             }
             else {
-                object[filename] = null;
                 this.fileHandler(object, filename, filepath);
             }
         }
