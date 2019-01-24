@@ -1,6 +1,6 @@
 {
   "name": "directory-scanner",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "dist",
   "scripts": {
@@ -25,7 +25,9 @@
     "path"
   ],
   "license": "ISC",
-  "dependencies": {
-    "@types/node": "^10.0.0"
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "typescript": "^3.2.4"
   }
 }
