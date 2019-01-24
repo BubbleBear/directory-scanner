@@ -22,24 +22,15 @@ the actions **directory-scanner** will take while scanning directory can acutall
 
 an example is:
 
-    import { Scanner } from 'directory-scanner';
-    import * as fs from 'fs';
-    import * as path from 'path';
+    const { Scanner } = require('../dist');
+    const path = require('path');
 
-    const scanner = new Scanner();
+    const ds = new Scanner({
+        fileHandler(o, fn, fp, ext) {
+            o[fn] = ext;
+        },
+    });
 
-    scanner.fileHandler = (o, fn, fp) => {
-        const extname = path.extname(fn);
-        if (extname == '.schema') {
-            o[fn] = fs.readFileSync(fp).toString();
-        }
-    }
+    const obj = ds.scan(path.resolve(__dirname, '../'));
 
-    const schemaLoader = function (dirRealPath) {
-        const res = scanner.scan(dirRealPath);
-        console.log(res)
-    }
-
-    schemaLoader(path.resolve(__dirname, '../test'));
-
-the code above will read all files with *\.schema* extname in target directory
+    console.dir(obj);
