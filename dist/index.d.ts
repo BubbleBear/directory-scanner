@@ -1,5 +1,7 @@
 interface ScannerOption {
-    fileHandler?(object: object, filename: string, filepath?: string, extname?: string): any;
+    fileHandler?(object: {
+        [prop: string]: any;
+    }, filename: string, filepath?: string, extname?: string): any;
     [prop: string]: any;
 }
 declare class Scanner {

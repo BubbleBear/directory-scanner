@@ -5,7 +5,7 @@ import * as utils from 'util';
 const fsStat = utils.promisify(fs.stat);
 
 interface ScannerOption {
-    fileHandler?(object: object, filename: string, filepath?: string, extname?: string): any;
+    fileHandler?(object: { [prop: string]: any }, filename: string, filepath?: string, extname?: string): any;
     [prop: string]: any;
 };
 
