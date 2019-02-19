@@ -1,5 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as utils from 'util';
+
+const fsStat = utils.promisify(fs.stat);
 
 interface ScannerOption {
     fileHandler?(object: object, filename: string, filepath?: string, extname?: string): any;
@@ -13,29 +16,29 @@ class Scanner {
         this.deconstructOptions(options);
     }
 
-    public scan(dirRealPath: string) {
+    public async scan(dirRealPath: string) {
         const rootObj = {};
-        this.recursiveScan(rootObj, dirRealPath);
+        await this.recursiveScan(rootObj, dirRealPath);
         return rootObj;
     }
 
-    public fileHandler(object, filename, filepath, extname) {
+    public async fileHandler(object, filename, filepath, extname) {
         object[filename] = extname;
     }
 
-    private recursiveScan(object, dirPath) {
+    private async recursiveScan(object, dirPath) {
         const files = fs.readdirSync(dirPath);
 
         for (let filepath of files) {
             filepath = path.resolve(dirPath, filepath);
             const filename = path.basename(filepath);
             if (filename == '.' || filename == '..') continue;
-            const stat = fs.statSync(filepath);
+            const stat = await fsStat(filepath);
             if (stat.isDirectory()) {
                 object[filename] = {};
-                this.recursiveScan(object[filename], filepath);
+                await this.recursiveScan(object[filename], filepath);
             } else {
-                this.fileHandler(object, filename, filepath, path.extname(filename));
+                await this.fileHandler(object, filename, filepath, path.extname(filename));
             }
         }
     }
