@@ -19,9 +19,14 @@ class Scanner {
         this.deconstructOptions(options);
     }
     scan(dirRealPath) {
+        const rootObj = {};
+        this.recursiveScan(rootObj, dirRealPath);
+        return rootObj;
+    }
+    scanAsync(dirRealPath) {
         return __awaiter(this, void 0, void 0, function* () {
             const rootObj = {};
-            yield this.recursiveScan(rootObj, dirRealPath);
+            yield this.recursiveScanAsync(rootObj, dirRealPath);
             return rootObj;
         });
     }
@@ -31,6 +36,23 @@ class Scanner {
         });
     }
     recursiveScan(object, dirPath) {
+        const files = fs.readdirSync(dirPath);
+        for (let filepath of files) {
+            filepath = path.resolve(dirPath, filepath);
+            const filename = path.basename(filepath);
+            if (filename == '.' || filename == '..')
+                continue;
+            const stat = fs.statSync(filepath);
+            if (stat.isDirectory()) {
+                object[filename] = {};
+                this.recursiveScan(object[filename], filepath);
+            }
+            else {
+                this.fileHandler(object, filename, filepath, path.extname(filename));
+            }
+        }
+    }
+    recursiveScanAsync(object, dirPath) {
         return __awaiter(this, void 0, void 0, function* () {
             const files = fs.readdirSync(dirPath);
             for (let filepath of files) {
@@ -41,7 +63,7 @@ class Scanner {
                 const stat = yield fsStat(filepath);
                 if (stat.isDirectory()) {
                     object[filename] = {};
-                    yield this.recursiveScan(object[filename], filepath);
+                    yield this.recursiveScanAsync(object[filename], filepath);
                 }
                 else {
                     yield this.fileHandler(object, filename, filepath, path.extname(filename));

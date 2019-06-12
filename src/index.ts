@@ -16,9 +16,15 @@ class Scanner {
         this.deconstructOptions(options);
     }
 
-    public async scan(dirRealPath: string) {
+    public scan(dirRealPath: string) {
         const rootObj = {};
-        await this.recursiveScan(rootObj, dirRealPath);
+        this.recursiveScan(rootObj, dirRealPath);
+        return rootObj;
+    }
+
+    public async scanAsync(dirRealPath: string) {
+        const rootObj = {};
+        await this.recursiveScanAsync(rootObj, dirRealPath);
         return rootObj;
     }
 
@@ -26,7 +32,24 @@ class Scanner {
         object[filename] = extname;
     }
 
-    private async recursiveScan(object, dirPath) {
+    private recursiveScan(object, dirPath) {
+        const files = fs.readdirSync(dirPath);
+
+        for (let filepath of files) {
+            filepath = path.resolve(dirPath, filepath);
+            const filename = path.basename(filepath);
+            if (filename == '.' || filename == '..') continue;
+            const stat = fs.statSync(filepath);
+            if (stat.isDirectory()) {
+                object[filename] = {};
+                this.recursiveScan(object[filename], filepath);
+            } else {
+                this.fileHandler(object, filename, filepath, path.extname(filename));
+            }
+        }
+    }
+
+    private async recursiveScanAsync(object, dirPath) {
         const files = fs.readdirSync(dirPath);
 
         for (let filepath of files) {
@@ -36,7 +59,7 @@ class Scanner {
             const stat = await fsStat(filepath);
             if (stat.isDirectory()) {
                 object[filename] = {};
-                await this.recursiveScan(object[filename], filepath);
+                await this.recursiveScanAsync(object[filename], filepath);
             } else {
                 await this.fileHandler(object, filename, filepath, path.extname(filename));
             }
