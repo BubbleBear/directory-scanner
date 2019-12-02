@@ -11,70 +11,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const utils = require("util");
-const fsStat = utils.promisify(fs.stat);
-;
-class Scanner {
-    constructor(options = {}) {
-        this.rootObj = {};
-        this.deconstructOptions(options);
-    }
-    scan(dirRealPath) {
-        const rootObj = {};
-        this.recursiveScan(rootObj, dirRealPath);
-        return rootObj;
-    }
-    scanAsync(dirRealPath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const rootObj = {};
-            yield this.recursiveScanAsync(rootObj, dirRealPath);
-            return rootObj;
-        });
-    }
-    fileHandler(object, filename, filepath, extname) {
-        return __awaiter(this, void 0, void 0, function* () {
-            object[filename] = extname;
-        });
-    }
-    recursiveScan(object, dirPath) {
-        const files = fs.readdirSync(dirPath);
-        for (let filepath of files) {
-            filepath = path.resolve(dirPath, filepath);
-            const filename = path.basename(filepath);
-            if (filename == '.' || filename == '..')
-                continue;
-            const stat = fs.statSync(filepath);
-            if (stat.isDirectory()) {
-                object[filename] = {};
-                this.recursiveScan(object[filename], filepath);
+function defaultHandler(filename, filepath) {
+    return filepath;
+}
+function scan(dirPath, handler = defaultHandler) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fileList = yield utils.promisify(fs.readdir)(dirPath);
+        return (yield Promise.all(fileList.map((filename) => __awaiter(this, void 0, void 0, function* () {
+            const filepath = path.resolve(dirPath, filename);
+            const fileStat = yield utils.promisify(fs.stat)(filepath);
+            if (fileStat.isDirectory()) {
+                return scan(filepath, handler);
             }
             else {
-                this.fileHandler(object, filename, filepath, path.extname(filename));
+                return handler(filename, filepath);
             }
-        }
-    }
-    recursiveScanAsync(object, dirPath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const files = fs.readdirSync(dirPath);
-            for (let filepath of files) {
-                filepath = path.resolve(dirPath, filepath);
-                const filename = path.basename(filepath);
-                if (filename == '.' || filename == '..')
-                    continue;
-                const stat = yield fsStat(filepath);
-                if (stat.isDirectory()) {
-                    object[filename] = {};
-                    yield this.recursiveScanAsync(object[filename], filepath);
-                }
-                else {
-                    yield this.fileHandler(object, filename, filepath, path.extname(filename));
-                }
-            }
-        });
-    }
-    deconstructOptions(options) {
-        ({
-            fileHandler: this.fileHandler = this.fileHandler,
-        } = options);
-    }
+        })))).reduce((acc, cur, idx) => {
+            const filename = fileList[idx];
+            acc[filename] = cur;
+            return acc;
+        }, {});
+    });
 }
-exports.Scanner = Scanner;
+exports.scan = scan;
+function scanSync(dirPath, handler = defaultHandler) {
+    const fileList = fs.readdirSync(dirPath);
+    return fileList.map((filename) => {
+        const filepath = path.resolve(dirPath, filename);
+        const fileStat = fs.statSync(filepath);
+        if (fileStat.isDirectory()) {
+            return scanSync(filepath, handler);
+        }
+        else {
+            return handler(filename, filepath);
+        }
+    }).reduce((acc, cur, idx) => {
+        const filename = fileList[idx];
+        acc[filename] = cur;
+        return acc;
+    }, {});
+}
+exports.scanSync = scanSync;

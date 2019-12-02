@@ -1,12 +1,10 @@
-const { Scanner } = require('../dist');
+const { scan, scanSync } = require('../dist');
 const path = require('path');
 
-const ds = new Scanner({
-    fileHandler(o, fn, fp, ext) {
-        o[fn] = ext;
-    },
+scan(path.resolve(__dirname)).then(obj => console.dir(obj, { depth: null }));
+
+const obj = scanSync(path.resolve(__dirname));
+
+console.dir(obj, {
+    depth: null
 });
-
-const obj = ds.scan(path.resolve(__dirname, '../'));
-
-console.dir(obj);
