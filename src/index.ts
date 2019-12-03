@@ -12,17 +12,23 @@ export async function scan(dirPath: string, handler = defaultHandler) {
     return (await Promise.all(
         fileList.map(async (filename) => {
             const filepath = path.resolve(dirPath, filename);
-            const fileStat = await utils.promisify(fs.stat)(filepath);
 
-            if (fileStat.isDirectory()) {
-                return scan(filepath, handler);
-            } else {
-                return handler(filename, filepath);
-            }
+            // ln pointing to nonexistent file may lead to rejection
+            try {
+                const fileStat = await utils.promisify(fs.stat)(filepath);
+
+                if (fileStat.isDirectory()) {
+                    return scan(filepath, handler);
+                } else {
+                    return handler(filename, filepath);
+                }
+            } catch (e) { }
         })
     )).reduce((acc, cur, idx) => {
-        const filename = fileList[idx];
-        acc[filename] = cur;
+        if (cur !== undefined && Object.keys(cur).length > 0) {
+            const filename = fileList[idx];
+            acc[filename] = cur;
+        }
 
         return acc;
     }, {} as Promise<any>);
@@ -33,16 +39,22 @@ export function scanSync(dirPath: string, handler = defaultHandler) {
 
     return fileList.map((filename) => {
         const filepath = path.resolve(dirPath, filename);
-        const fileStat = fs.statSync(filepath);
 
-        if (fileStat.isDirectory()) {
-            return scanSync(filepath, handler);
-        } else {
-            return handler(filename, filepath);
-        }
+        // ln pointing to nonexistent file may lead to error
+        try {
+            const fileStat = fs.statSync(filepath);
+
+            if (fileStat.isDirectory()) {
+                return scanSync(filepath, handler);
+            } else {
+                return handler(filename, filepath);
+            }
+        } catch (e) { }
     }).reduce((acc, cur, idx) => {
-        const filename = fileList[idx];
-        acc[filename] = cur;
+        if (cur !== undefined && Object.keys(cur).length > 0) {
+            const filename = fileList[idx];
+            acc[filename] = cur;
+        }
 
         return acc;
     }, {});
