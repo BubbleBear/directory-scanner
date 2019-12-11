@@ -31,7 +31,7 @@ function scan(dirPath, handler = defaultHandler) {
             }
             catch (e) { }
         })))).reduce((acc, cur, idx) => {
-            if (cur !== undefined && Object.keys(cur).length > 0) {
+            if (cur !== undefined && Object.keys(cur).length > 0 || typeof cur === 'function') {
                 const filename = fileList[idx];
                 acc[filename] = cur;
             }
@@ -56,7 +56,7 @@ function scanSync(dirPath, handler = defaultHandler) {
         }
         catch (e) { }
     }).reduce((acc, cur, idx) => {
-        if (cur !== undefined && Object.keys(cur).length > 0) {
+        if (cur !== undefined && Object.keys(cur).length > 0 || typeof cur === 'function') {
             const filename = fileList[idx];
             acc[filename] = cur;
         }
