@@ -1,10 +1,10 @@
 const { scan, scanSync } = require('../dist');
 const path = require('path');
 
-scan(path.resolve(__dirname)).then(obj => console.dir(obj, { depth: null }));
+scan(path.resolve(__dirname), (_, fp) => require(fp)).then(obj => console.dir(obj, { depth: null }));
 
-const obj = scanSync(path.resolve(__dirname));
+// const obj = scanSync(path.resolve(__dirname));
 
-console.dir(obj, {
-    depth: null
-});
+// console.dir(obj, {
+//     depth: null
+// });

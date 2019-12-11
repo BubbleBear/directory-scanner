@@ -25,7 +25,7 @@ export async function scan(dirPath: string, handler = defaultHandler) {
             } catch (e) { }
         })
     )).reduce((acc, cur, idx) => {
-        if (cur !== undefined && Object.keys(cur).length > 0) {
+        if (cur !== undefined && Object.keys(cur).length > 0 || typeof cur === 'function') {
             const filename = fileList[idx];
             acc[filename] = cur;
         }
@@ -51,7 +51,7 @@ export function scanSync(dirPath: string, handler = defaultHandler) {
             }
         } catch (e) { }
     }).reduce((acc, cur, idx) => {
-        if (cur !== undefined && Object.keys(cur).length > 0) {
+        if (cur !== undefined && Object.keys(cur).length > 0 || typeof cur === 'function') {
             const filename = fileList[idx];
             acc[filename] = cur;
         }
